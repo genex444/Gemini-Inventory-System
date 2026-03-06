@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-w07&5gwrdk==i^43uy8szu2ftmy_-izw!_-((jd!p-e5l)whj6
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost',
+    'localhost','genex444.pythonanywhere.com',
     '127.0.0.1',
     '::1',
     '10.10.20.133','103.104.100.107','10.10.20.230',
@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <--- Add this line
 ]
 
 ROOT_URLCONF = 'inventory_management.urls'
@@ -132,7 +133,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'  # URL for static files
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
