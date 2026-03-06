@@ -1,0 +1,35 @@
+class Dashboard(LoginRequiredMixin, View):
+    def get(self, request):
+        sort_by = request.GET.get('sort_by', 'name')
+        form = InventoryItemSearchForm(request.GET)
+
+        # Staff sees all inventory items; regular users see only their items
+        if request.user.is_staff:
+            items = InventoryItem.objects.all().order_by(sort_by)
+        else:
+            items = InventoryItem.objects.filter(user=request.user).order_by(sort_by)
+
+        # Handle search logic
+        if form.is_valid():
+            search_query = form.cleaned_data.get('query', '')
+            if search_query:
+                items = items.filter(name__icontains=search_query)
+
+        # Check low inventory for the logged-in user
+        low_inventory = items.filter(quantity__lte=LOW_QUANTITY)
+        low_inventory_count = low_inventory.count()
+        low_inventory_ids = low_inventory.values_list('id', flat=True)
+
+        # Display a single warning message if there are low inventory items
+        if low_inventory_count > 0:
+            messages.warning(
+                request,
+                f"⚠️ {low_inventory_count} item(s) have low inventory."
+            )
+
+        # Render the dashboard
+        return render(request, 'inventory/dashboard.html', {
+            'items': items,
+            'low_inventory_ids': low_inventory_ids,
+            'form': form,
+        })

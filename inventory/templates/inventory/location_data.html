@@ -1,0 +1,322 @@
+{% extends 'inventory/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+    /* Custom styles for the dashboard */
+    body {
+        background-color: #f8f9fa;
+    }
+    .card-header {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .status-ok {
+        background-color: #d1e7dd !important;
+        color: #0f5132 !important;
+        font-weight: bold;
+        text-align: center;
+    }
+    .status-not-ok {
+        background-color: #f8d7da !important;
+        color: #842029 !important;
+        font-weight: bold;
+        text-align: center;
+    }
+    .date-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        max-width: 400px;
+    }
+    .table th, .table td {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <!-- Header and Controls -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h1 class="h4 mb-0">Studio Status Dashboard</h1>
+        <form method="get" class="date-form">
+            <label for="date" class="form-label mb-0 me-2">Select Date:</label>
+            <input type="date" id="date" name="date" value="{{ selected_date }}" class="form-control">
+            <button type="submit" class="btn btn-primary">View</button>
+        </form>
+    </div>
+
+    <!-- Studio Data Grid -->
+    <div class="row g-4">
+
+        <!-- Las Vegas Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">LAS VEGAS DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in lasvegas_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monaco Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">MONACO DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in monaco_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suzuka Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-danger text-white">SUZUKA DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in suzuka_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abu Dhabi Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">ABU DHABI DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in abudhabi_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Philippines Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">PHILIPPINES DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in philippines_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plinko Card -->
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header" style="background-color: purple; color: white;">PLINKO DATA</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                    <th>Topview</th>
+                                    <th>OBS</th>
+                                    <th>Audio</th>
+                                    <th>Camera</th>
+                                    <th>Network</th>
+                                    <th>Printer</th>
+                                    <th>AI Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in plinko_data %}
+                                <tr>
+                                    <td class="text-danger small">{{ entry.user }}</td>
+                                    <td class="text-info small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td class="status-{{ entry.topview|status_class }}">{{ entry.topview }}</td>
+                                    <td class="status-{{ entry.obs|status_class }}">{{ entry.obs }}</td>
+                                    <td class="status-{{ entry.audio|status_class }}">{{ entry.audio }}</td>
+                                    <td class="status-{{ entry.camera|status_class }}">{{ entry.camera }}</td>
+                                    <td class="status-{{ entry.network_status|status_class }}">{{ entry.network_status }}</td>
+                                    <td class="status-{{ entry.printer_status|status_class }}">{{ entry.printer_status }}</td>
+                                    <td class="status-{{ entry.AI_Cam|status_class }}">{{ entry.AI_Cam }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center text-muted p-4">No data for this date.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'incident_dashboard' %}" class="btn btn-outline-primary">Go back</a>
+    </div>
+
+</div>
+{% endblock content %}

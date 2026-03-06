@@ -1,0 +1,94 @@
+{% extends 'inventory/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+    <div class="container">
+        <div class="row g-4 justify-content-center">
+
+            <!-- Card 1 -->
+            <div class="col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="card shadow-lg border-4 rounded-4 bg-white bg-opacity-75 w-100">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-between">
+                        <h1 class="fw-bold text-primary mb-4">Gaming Inventory System</h1>
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg px-5 shadow-sm mt-auto"
+                           style="transition: transform 0.3s, box-shadow 0.3s;"
+                           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 10px 20px rgba(0,0,0,0.2)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 5px 10px rgba(0,0,0,0.1)';">
+                            Proceed
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="card shadow-lg border-4 rounded-4 bg-white bg-opacity-75 w-100">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-between">
+                        <h1 class="fw-bold text-secondary mb-4">Gaming Studio Monitoring</h1>
+                        <a href="{% url 'incident_dashboard' %}" class="btn btn-secondary btn-lg px-5 shadow-sm mt-auto"
+                           style="transition: transform 0.3s, box-shadow 0.3s;"
+                           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 10px 20px rgba(0,0,0,0.2)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 5px 10px rgba(0,0,0,0.1)';">
+                            Proceed
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="card shadow-lg border-4 rounded-4 bg-white bg-opacity-75 w-100">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-between">
+                        <h1 class="fw-bold text-warning mb-4">Gaming Studio Obstacles</h1>
+                        <a href="{% url 'obstacle-list' %}" class="btn btn-warning btn-lg px-5 shadow-sm mt-auto"
+                           style="transition: transform 0.3s, box-shadow 0.3s;"
+                           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 10px 20px rgba(0,0,0,0.2)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 5px 10px rgba(0,0,0,0.1)';">
+                            Proceed
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="card shadow-lg border-4 rounded-4 bg-white bg-opacity-75 w-100">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-between">
+                        <h1 class="fw-bold text-success mb-4">Gaming Studio Daily Checklist</h1>
+                        <a href="{% url 'daily_checklist' %}" class="btn btn-success btn-lg px-5 shadow-sm mt-auto"
+                           style="transition: transform 0.3s, box-shadow 0.3s;"
+                           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 10px 20px rgba(0,0,0,0.2)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 5px 10px rgba(0,0,0,0.1)';">
+                            Proceed
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+                <div class="card shadow-lg border-4 rounded-4 bg-white bg-opacity-75 w-100">
+                    <div class="card-body text-center p-5 d-flex flex-column justify-content-between">
+                        <h1 class="fw-bold text-danger mb-4">Gaming Incident Dashboard</h1>
+                        <a href="{% url 'looker-studio' %}" class="btn btn-danger btn-lg px-5 shadow-sm mt-auto"
+                           style="transition: transform 0.3s, box-shadow 0.3s;"
+                           onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0px 10px 20px rgba(0,0,0,0.2)';"
+                           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0px 5px 10px rgba(0,0,0,0.1)';">
+                            Proceed
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+</style>
+{% endblock content %}

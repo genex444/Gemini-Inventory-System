@@ -1,0 +1,122 @@
+{% extends 'inventory/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+<div class="container mt-5 card shadow-lg p-4 ">
+    <h1 class="text-center text-primary fs-15 fw-bold">Edit Specific Item Status/Label</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Status Field with Enhanced Dropdown -->
+        <div class="form-group">
+            <label for="id_status" class="font-weight-bold">Equipment Status</label>
+            <div class="input-group">
+                {{ form.status }}
+            </div>
+        </div>
+
+    <br>
+    <br>
+
+        <!-- Label Field -->
+        <div class="form-group">
+            <label for="id_label" class="font-weight-bold ">Equipment tagging</label>
+            <div class="input-group">
+                {{ form.label }}
+            </div>
+
+            {% if form.label.errors %}
+                <div class="text-danger">
+                    {% for error in form.label.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_serial" class="font-weight-bold ">Equipment Serial</label>
+            <div class="input-group">
+                {{ form.serial }}
+            </div>
+
+        </div>
+
+        <div class="form-group">
+            <label for="id_model" class="font-weight-bold ">Equipment Model</label>
+            <div class="input-group">
+                {{ form.model }}
+            </div>
+
+
+        </div>
+                <div class="form-group">
+            <label for="id_details" class="font-weight-bold ">Equipment Details</label>
+            <div class="input-group">
+                {{ form.details }}
+            </div>
+
+
+        </div>
+
+        <div class="form-group">
+            <label for="id_status" class="font-weight-bold">Room</label>
+            <div class="input-group">
+                {{ form.room }}
+            </div>
+        </div>
+
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-success btn-block mt-3 " >Update Label</button>
+    </form>
+
+    <!-- Back Button -->
+    <a href="{% url 'item-detail' pk=object.inventory_item.pk %}" class="btn btn-outline-primary mt-3">Back to Item Details</a>
+</div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const statusField = document.querySelector('#id_status');
+        const roomField = document.querySelector('#id_room');
+
+        function toggleRoomField() {
+            const disallowedStatuses = ['broken', 'resell'];
+            if (disallowedStatuses.includes(statusField.value)) {
+                roomField.value = '';
+                roomField.setAttribute('disabled', 'disabled');
+                roomField.setAttribute('placeholder', 'Room selection disabled for this status.');
+            } else {
+                roomField.removeAttribute('disabled');
+                roomField.removeAttribute('placeholder');
+            }
+        }
+
+        toggleRoomField();
+        statusField.addEventListener('change', toggleRoomField);
+    });
+</script>
+
+    <style>
+
+    .form-group label {
+        font-size: 1.1rem;
+    }
+    .form-group .input-group-text {
+        border-radius: 0;
+    }
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+    </style>
+{% endblock %}
+

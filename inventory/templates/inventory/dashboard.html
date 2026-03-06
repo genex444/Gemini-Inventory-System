@@ -1,0 +1,679 @@
+{% extends 'inventory/base.html' %}
+
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+
+<div>
+    <div class="row ">
+        <div class="col-md-10 col-12 mx-auto mt-5 ">
+            <!-- Button for adding new items with shadow -->
+
+            <!-- Search form with aligned buttons, all inside a shadowed div -->
+            <div class=" border shadow-lg p-4 rounded">
+                <form class="d-flex align-items-center mb-4" method="get" action="{% url 'dashboard' %}">
+                    <input
+                        class="form-control me-2 border-primary"
+                        type="text"
+                        name="query"
+                        placeholder="Search Inventory"
+                        value="{{ query }}"
+                    >
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-search"></i>
+                    </button>
+
+                    <div class="col-md-2 d-flex align-items-center">
+                        <a href="{% url 'search' %}" class="btn btn-danger my-3 mx-4">
+                            <i class="fa fa-bed"></i> Search by Rooms
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Additional buttons for navigation and export inside shadowed div -->
+            <div class="shadow-lg p-3 mt-4 d-flex flex-wrap gap-2 rounded">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fa fa-arrow-left"></i> Go Back
+                </a>
+                <a href="{% url 'export-excel' %}?sort_by={{ request.GET.sort_by }}&query={{ request.GET.query }}" class="btn btn-primary">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel
+                </a>
+                <a href="{% url 'transaction-logs' %}" class="btn btn-primary">
+                    <i class="fa fa-file-text-o"></i> Transaction Logs
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<br><div class="border border-light card shadow-lg p-4 ">
+    <div class="border border-light row shadow-lg p-4 rounded d-flex justify-content-center gap-4">
+
+        {% if messages %}
+        <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-6 col-12 d-flex">
+            <div class="dash-widget dash3 w-100
+                {% for message in messages %}
+                    {% if message.tags == 'error' %} bg-danger {% else %} bg-success {% endif %}
+                {% endfor %}" style="min-height: 180px; padding: 20px;">
+                <div class="dash-widget-messages text-center">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %} alert-danger {% else %} alert-success {% endif %}">
+                            <i class="fa fa-keyboard-o fa-4x" aria-hidden="true"></i>
+                            <h4 class="fw-bold mt-2"><span class="counters">{{ message }}</span></h4>
+                            <h6>LOW INVENTORY</h6>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-6 col-12 d-flex">
+            <div class="dash-widget w-100 bg-info text-center shadow-lg rounded" style="min-height: 180px; padding: 20px;">
+                <i class="fa fa-database fa-4x"></i>
+                <h2 class="fw-bold mt-2">{{ total_items }}</h2>
+                <h6>Total Inventory Items</h6>
+            </div>
+        </div>
+
+        <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-6 col-12 d-flex">
+            <div class="dash-widget w-100 bg-warning text-center shadow-lg rounded" style="min-height: 180px; padding: 20px;">
+                <i class="fa fa-laptop fa-4x"></i>
+                <h2 class="fw-bold mt-2">{{ total_backup }}</h2>
+                <h6>Total Backup / Stock</h6>
+            </div>
+        </div>
+
+<div class="col-xxl-2 col-xl-2 col-lg-3 col-md-6 col-12 d-flex">
+    <a href="{% url 'broken-items-dashboard' %}" class="w-100 text-decoration-none">
+        <div class="dash-widget dash1 w-100 bg-light text-center shadow-lg rounded p-4"
+             style="min-height: 180px; transition: transform 0.3s, box-shadow 0.3s;">
+            <i class="fa fa-times-circle fa-4x mb-3" style="color: #000;"></i>
+            <h2 class="fw-bold mt-2 text-black">{{ total_broken }}</h2>
+            <h6 class="text-black">Total Broken</h6>
+        </div>
+    </a>
+</div>
+
+
+        <div class="col-xxl-2 col-xl-2 col-lg-3 col-md-6 col-12 d-flex">
+            <div class="dash-widget dash2 w-100 bg-success text-center shadow-lg rounded" style="min-height: 180px; padding: 20px;">
+                <i class="fa fa-check fa-4x"></i>
+                <h2 class="fw-bold mt-2">{{ total_in_use }}</h2>
+                <h6>Total Used</h6>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!---
+	{% if messages %}
+		<div class="row mt-3">
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+					<div class="col-md-10 col-12 mx-auto alert alert-danger">
+						{{ message }}
+					</div>
+				{% else %}
+					<div class="col-md-10 col-12 mx-auto alert alert-success">
+						{{ message }}
+					</div>
+				{% endif %}
+			{% endfor %}
+		</div>
+	{% endif %}
+
+	--!>
+
+
+<br>
+
+            <div class="d-flex justify-content mb-3 mx-4">
+                <a href="{% url 'add-item' %}" class="btn btn-success shadow-lg">
+                    <i class="fa fa-plus"></i> + Add New Items
+                </a>
+            </div>
+
+<div class="card shadow-lg mx-4 ">
+<table class="table table-hover ">
+    <thead>
+        <tr class="table-primary">
+            <!-- ID column with icon -->
+            <th scope="col" class="text-center" style="width: 50px;">
+                <a href="?sort_by=id">
+                    <i class="fa fa-id-card"></i> ID
+                </a>
+            </th>
+            <!-- Image column with icon -->
+
+            <!-- User column -->
+            <th scope="col" class="text-center" style="width: 0px;">
+                <a href="?sort_by=user">
+                    <i class="fa fa-user"></i> USER
+                </a>
+            </th>
+            <th scope="col" class="text-center" style="width: 50px;" >
+                 <a href="?sort_by=user">
+                <i class="fa fa-image"></i> IMAGE
+            </th>
+            <!-- Name column -->
+            <th scope="col" class="text-center">
+                <a href="?sort_by=name">
+                    <i class="fa fa-tag"></i> NAME
+                </a>
+            </th>
+            <!-- Quantity column -->
+            <th scope="col" class="text-center">
+                <a href="?sort_by=quantity">
+                    <i class="fa fa-box"></i> QUANTITY
+                </a>
+            </th>
+            <th scope="col" class="text-center text-success">
+                    <i class="fa fa-check"></i>InUse
+            </th>
+            <th scope="col" class="text-center text-warning">
+                     <i class="fa fa-archive"></i> BACKUP STOCK
+            </th>
+            <th scope="col" class="text-center text-secondary">
+                     <i class="fa fa-archive"></i> Broken
+            </th>
+            <!-- Category dropdown -->
+            <th scope="col" class="text-center">
+                <form method="get" action="{% url 'dashboard' %}">
+                    <select class="form-control text-danger" name="category" onchange="this.form.submit()">
+                        <option value="">ALL CATEGORIES ▼</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.id|stringformat:"s" == request.GET.category %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for key, value in request.GET.items %}
+                        {% if key != 'category' %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
+                </form>
+            </th>
+            <!-- Supplier column -->
+
+            <!-- Model column -->
+            <!-- Date Posted column -->
+        <!--    <th scope="col" class="text-center">
+                <a href="?sort_by=date_created">
+                    <i class="fa fa-calendar"></i> DATE POSTED
+                </a>
+            </th>
+            <!-- Date Modified column -->
+           <!-- <th scope="col" class="text-center">
+                <a href="?sort_by=date_modified">
+                    <i class="fa fa-clock"></i> DATE MODIFIED
+                </a>
+            </th> --!>
+            <!-- Actions column -->
+            <th scope="col" class="text-center text-dark">
+                <i class="fa fa-cogs"></i> ACTIONS
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if items|length == 0 %}
+            <tr>
+                <td colspan="12" class="text-center">No items found</td>
+            </tr>
+        {% else %}
+            {% for item in items %}
+                <tr class="{% if item.id in highlighted_item_ids %}table-light{% endif %}">
+                    <!-- ID column -->
+                    <td class="text-center text-success" style="width: 50px;">
+                        <i class="fa fa-id-card text-primary"></i> {{ item.id }}
+                    </td>
+                    <!-- Image column -->
+
+                    <!-- Other columns -->
+                    <td class="text-center text-danger">
+                        <i class="fa fa-user text-warning fa-lg"></i> {{ item.user | upper }}
+                    </td>
+                    <td class="text-center">
+                        <div class="card shadow-sm mx-auto" style="width: 15rem;">
+                            <div class="card-body text-center p-2">
+                         <h6 class="card-title mb-1"></h6>
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}" class=" mg-thumbnail logo-hover" style="max-width: 100px; height: auto; z-index:99;">
+                        {% else %}
+                            <i class="fa fa-image text-muted "></i> No Image
+                        {% endif %}
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="text-center text-primary">
+                        <a href="{% url 'item-detail' item.id %}" class="text-info fw-bold">
+                            <i class="fa fa-tag"></i> {{ item.name | upper }}
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        <div class="card shadow-sm mx-auto" style="width: 10rem;">
+                            <div class="card-body text-center p-2">
+            <h6 class="card-title mb-1">Quantity</h6>
+            {% if item.id in low_inventory_ids %}
+                <span class="badge bg-danger">
+                    <i class="fa fa-exclamation-triangle"></i> {{ item.quantity }}
+                </span>
+            {% elif item.quantity <= 10 %}
+                <span class="badge bg-warning">
+                    <i class="fa fa-exclamation-circle"></i> {{ item.quantity }}
+                </span>
+            {% else %}
+                <span class="badge bg-success">
+                    <i class="fa fa-check-circle"></i> {{ item.quantity }}
+                </span>
+            {% endif %}
+                            </div>
+                        </div>
+                    </td>
+<td class="text-center">
+    <div class="card shadow-sm mx-auto" style="width: 10rem;">
+        <div class="card-body text-center p-2">
+            <h6 class="card-title mb-1">In Use</h6>
+            {% with in_use_counts|get_item:item.id|default:0 as in_use_count %}
+                <span class="badge bg-success p-2"
+                      style="cursor: help;"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-html="true"
+                      data-bs-placement="right"
+                      title="Specific Items: IN USE"
+                      data-bs-content="
+                        <div class='popover-table-container'>
+                            <table class='table table-sm' style='font-size: 0.9rem;'>
+                                <thead class='table-dark'>
+                                    <tr>
+                                        <th>Label</th>
+                                        <th>Room</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for specific_item in item.specific_items.all %}
+                                        {% if specific_item.status == 'inUse' %}
+                                        <tr>
+                                            <td class='text-primary fw-bold'>{{ specific_item.label|upper }}</td>
+                                            <td><span class='badge' style='background-color: {{ specific_item.room.color }};'>{{ specific_item.room.name }}</span></td>
+                                            <td><span class='badge' style='background-color: {{ specific_item.get_status_color }};'>{{ specific_item.get_status_display | upper }}</span></td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                      ">
+                    <i class="fa fa-check-circle"></i> {{ in_use_count }}
+                </span>
+            {% endwith %}
+        </div>
+    </div>
+</td>
+
+<td class="text-center">
+    <div class="card shadow-sm mx-auto" style="width: 10rem;">
+        <div class="card-body text-center p-2">
+            <h6 class="card-title mb-1">Backup</h6>
+            {% with backup_counts|get_item:item.id|default:0 as backup_count %}
+                <span class="badge bg-warning text-dark p-2"
+                      style="cursor: help;"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-html="true"
+                      data-bs-placement="right"
+                      title="Specific Items: BACKUP/STOCK"
+                      data-bs-content="
+                        <div class='popover-table-container'>
+                            <table class='table table-sm' style='font-size: 0.7rem;'>
+                                <thead class='table-warning'>
+                                    <tr>
+
+                                        <th>Label</th>
+                                        <th>Room</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for specific_item in item.specific_items.all %}
+                                        {% if specific_item.status == 'backup/Stock' %}
+                                        <tr>
+                                            <td class='fw-bold'>{{ specific_item.label|upper }}</td>
+                                            <td><span class='badge' style='background-color: {{ specific_item.room.color }};'>{{ specific_item.room.name }}</span></td>
+                                            <td><span class='badge' style='background-color: {{ specific_item.get_status_color }};'>{{ specific_item.get_status_display | upper }}</span></td>
+                                        </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                      ">
+                    {{ backup_count }}
+                </span>
+            {% endwith %}
+        </div>
+    </div>
+</td>
+
+<td class="text-center">
+    <div class="card shadow-sm mx-auto" style="width: 10rem;">
+        <div class="card-body text-center p-2">
+            <h6 class="card-title mb-1">Broken</h6>
+            {% with broken_counts|get_item:item.id|default:0 as broken_count %}
+                <span class="badge bg-secondary p-2"
+                      style="cursor: help; font-size: 0.9rem;"
+                      data-bs-toggle="popover"
+                      data-bs-trigger="hover focus"
+                      data-bs-html="true"
+                      title="Broken Items"
+                      data-bs-content="
+                        <div class='popover-list'>
+                            {% for spec in item.specific_items.all %}
+                                {% if spec.status == 'broken' %}
+                                    <div class='mb-2 border-bottom pb-1'>
+                                        <span class='text-danger fw-bold'>{{ spec.label|upper }}</span><br>
+                                        <small class='text-muted'>Room: {{ spec.room.name }}</small>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                      ">
+                    {{ broken_count }}
+                </span>
+            {% endwith %}
+        </div>
+    </div>
+</td>
+                    <td class="text-center text-primary"><span class="badge" style="background-color: {{ item.category.color }}; font-size: 0.6rem; margin-left: 10px;border-radius: 5px;">{{ item.category.name | upper }}</td>
+                   <!-- <td class="text-center text-primary"><span class="badge bg-success">{{ item.date_created|date:"Y-m-d: H:i" }}</span></td>
+                    <td class="text-center text-info"><span class="badge bg-info">{{ item.date_modified|date:"Y-m-d: H:i" }}</span></td> --!>
+<td class="text-center">
+    <div class="card shadow-sm mx-auto" style="width: 10rem;">
+        <div class="card-body text-center p-2">
+            <h6 class="card-title mb-1">Edit</h6>
+    <a href="{% url 'edit-item' item.id %}" class="text-dark fs-4">
+        <i class="fa fa-edit"></i>
+    </a>
+        </div>
+    </div>
+</td>
+
+
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </tbody>
+</table>
+
+
+</div>
+
+
+
+<style>
+
+
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+
+    .logo-hover {
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .logo-hover:hover {
+        transform: scale(3.0); /* Slightly increases size */
+        filter: brightness(1.2); /* Increases brightness on hover */
+    }
+.table img {
+    width: 100px; /* Set the fixed width */
+    height: 100px; /* Set the fixed height */
+    object-fit: cover; /* Ensure the aspect ratio is maintained while filling the box */
+    border-radius: 10px; /* Rounded corners */
+    border: 2px solid #ffffff; /* Border with color (adjust as needed) */
+    padding: 2px; /* Optional: Adds spacing inside the border */
+    background-color: white; /* Optional: Ensures background color */
+}
+.card-body{
+    z-index: 1;
+}
+
+    .fa:hover {
+        color: #007bff; /* Change color on hover (e.g., Bootstrap's primary color) */
+        transform: scale(1.2); /* Slight zoom-in effect */
+        transition: color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    }
+    .navbar .fa:hover {
+    color: #28a745; /* Green for navbar icons */
+}
+
+.footer .fa:hover {
+    color: #dc3545; /* Red for footer icons */
+}
+    .fa:hover {
+    cursor: pointer;
+}
+
+/* General Row Layout */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -5px;
+    margin-right: -5px;
+    padding-left: 10px; /* Add padding to the left */
+    padding-right: 10px; /* Add padding to the right */
+}
+
+/* Dash Widgets */
+.dash-widget, .dash-count {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dash-widget:hover, .dash-count:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Dash Widget Image */
+.dash-widgetimg span {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.dash-widgetimg img {
+    width: 50px; /* Adjust icon size */
+    height: auto;
+}
+
+/* Dash Widget Content */
+.dash-widgetcontent h5 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.dash-widgetcontent h6 {
+    font-size: 1.2rem;
+    color: #777;
+    margin-top: 10px;
+}
+
+/* Counters */
+.counters {
+    font-weight: bold;
+    font-size: 2.5rem;
+    color: #333;
+}
+
+/* Dash Count */
+.dash-counts h4 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.dash-counts h5 {
+    font-size: 1.2rem;
+    color: #777;
+}
+
+.dash-imgs svg,
+.dash-imgs img {
+    width: 40px;
+    height: auto;
+    margin-top: 15px;
+}
+
+/* Specific Dash Widgets Styling */
+.dash1 { background-color: #f9f9f9; }
+.dash2 { background-color: #e9f7f6; }
+.dash3 { background-color: #f7f9fc; }
+
+.dash-count {
+    background-color: #f0f8ff;
+}
+
+.dash-counts h4 {
+    color: #007bff;
+}
+
+.dash-count.das1 h4 {
+    color: #28a745; /* Green for suppliers */
+}
+
+.dash-count.das2 h4 {
+    color: #ffc107; /* Yellow for purchase invoices */
+}
+
+.dash-count.das3 h4 {
+    color: #dc3545; /* Red for sales invoices */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .col-xl-3, .col-sm-6, .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+}
+
+@media (min-width: 769px) {
+    .col-xl-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+}
+
+
+.highlight {
+    background-color: #ffeb3b; /* Yellow background */
+    font-weight: bold;        /* Bold text */
+    color: #000;              /* Black text */
+}
+    .table th,
+    .table td {
+        padding: 0.5px 10px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+.popover {
+    max-width: 450px !important;
+    max-height: 400px; /* Reduced for better UX */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.popover-table-container {
+    max-height: 350px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Ensure the popover doesn't disappear when moving the mouse to it */
+.popover:hover {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+.popover-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    text-align: center;
+
+}
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl, {
+                container: 'body',
+                sanitize: false, // Allows the table to render
+                trigger: 'hover focus'
+            })
+        })
+    });
+document.addEventListener('DOMContentLoaded', function () {
+    const triggers = document.querySelectorAll('[data-bs-toggle="popover"]');
+
+    triggers.forEach(el => {
+        new bootstrap.Popover(el, {
+            container: 'body',
+            html: true,
+            sanitize: false,
+            trigger: 'hover focus',
+            delay: { show: 550, hide: 3500 }
+        });
+
+        let scrollTimeout;
+
+        el.addEventListener('shown.bs.popover', function () {
+            const popover = document.querySelector('.popover:last-child');
+            if (!popover) return;
+
+            const container = popover.querySelector('.popover-table-container');
+            if (!container) return;
+
+            // reset state
+            container.classList.remove('scroll-enabled');
+
+            // enable scroll after delay
+            scrollTimeout = setTimeout(() => {
+                container.classList.add('scroll-enabled');
+            }, 400); // 👈 SCROLL DELAY (ms)
+        });
+
+        el.addEventListener('hide.bs.popover', function () {
+            clearTimeout(scrollTimeout);
+        });
+    });
+});
+
+
+</script>
+{% endblock content %}

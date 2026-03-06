@@ -1,0 +1,83 @@
+{% extends "inventory/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Items Status Chart</h2>
+    <canvas id="statusChart" width="400" height="200"></canvas>
+
+    <h3>Item Details</h3>
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ item.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Category:</strong> {{ item.category.name }}</p>
+                    <p><strong>Status:</strong> {{ item.get_status_display }}</p>
+                    <p><strong>Quantity:</strong> {{ item.quantity }}</p>
+                    <p><strong>Label:</strong> {{ item.label }}</p>
+                    <p><strong>Serial:</strong> {{ item.serial }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Get data passed from the backend
+    const chartLabels = {{ chart_data.labels|safe }};
+    const chartStatuses = {{ chart_data.statuses|safe }};
+    const chartQuantities = {{ chart_data.quantities|safe }};
+
+    // Create a bar chart to represent item quantities and their statuses
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(ctx, {
+        type: 'bar', // You can change this to 'pie', 'line', etc.
+        data: {
+            labels: chartLabels, // Item names
+            datasets: [{
+                label: 'Quantities',
+                data: chartQuantities, // Quantities of each item
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Status and Quantities of Specific Items'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

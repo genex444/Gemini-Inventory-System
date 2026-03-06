@@ -1,0 +1,834 @@
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mb-3"> 🢀 Back to Dashboard</a>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Left Section (Item Details Card) - Made narrower -->
+        <div class="col-md-3 col-lg-2">
+            <div class="card shadow item-details-card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5>ITEM DETAILS</h5>
+                </div>
+                <div class="card-body p-2">
+                    <table class="table table-hover table-bordered table-sm">
+                        <tbody>
+                            <tr>
+                                <th class="text-primary">Name</th>
+                                <td class="text-danger fw-bold">{{ item.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Assigned to</th>
+                                <td>
+                                    {% if object.groups %}
+                                        <span class="text-info fw-bold">{{ object.groups.name }}</span>
+                                    {% else %}
+                                        <span>No group assigned</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">ID</th>
+                                <td>{{ item.id }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Category</th>
+                                <td>{{ item.category.name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Quantity</th>
+                                <td class="text-primary fw-bold">{{ item.quantity }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Supplier</th>
+                                <td>{{ item.supplier }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Local</th>
+                                <td>{{ item.local }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Date Created</th>
+                                <td class="text-success fw-bold">{{ item.date_created|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Date Modified</th>
+                                <td class="text-info fw-bold">{{ item.date_modified|date:"Y-m-d H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-primary">Image</th>
+                                <td>
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-thumbnail" style="max-width: 100px; height: auto;">
+                                    {% else %}
+                                        <span>No image.</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <form method="POST" class="d-inline">
+                        {% csrf_token %}
+                        {{ status_form.as_p }}
+                        <button type="submit" class="btn btn-success fw-bold">+ {{ item.name }}</button>
+                    </form>
+                    <a href="{% url 'edit-item' item.id %}" class="btn btn-outline-danger">Edit</a>
+                </div>
+            </div>
+        </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.19.3/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+
+        <!-- Right Section (Deployed Items Table) - Made wider -->
+        <div class="col-md-9 col-lg-10">
+            <div class="card shadow-lg p-3">
+                <h3 class="text-primary">DEPLOYED ITEMS OF <span class="text-danger fw-bold">{{ item.name }}</span></h3>
+                <div class="d-flex gap-2">
+                <button id="exportExcel" class="btn btn-success btn-sm">📊 Export to Excel</button>
+                <button id="exportPDF" class="btn btn-danger btn-sm">📄 Export to PDF</button>
+            </div>
+            <br>
+                <form method="get" class="mb-3">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control border-primary" placeholder="Search tagging number..." value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary">⌕</button>
+
+                    </div>
+
+
+                </form>
+                <div class="scrollable-section" style="max-height: 500px; overflow-y: auto;">
+
+<table id="deployedTable" class="table table-hover table-striped table-bordered table-sm">
+                        <thead>
+                        <div id="filterBar" class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-2 bg-light shadow-sm"
+     style="position: sticky; top: 0; z-index: 100; border-radius: 6px;">
+    <div class="d-flex gap-2">
+              <button id="sortLabel" class="btn btn-info btn-sm">Sort: A → Z</button>
+
+        <!-- Filter by Room -->
+        <select id="filterRoom" class="form-select form-select-sm" style="width: 180px;">
+            <option value="">All Rooms</option>
+            <option value="IT-Office">IT-Office</option>
+            <option value="IT-Room-(Stockroom)">IT-Room-(Stockroom)</option>
+            <option value="S1 (LAS VEGAS)">S1 (LAS VEGAS)</option>
+            <option value="C1 (LAS VEGAS)">C1 (LAS VEGAS)</option>
+            <option value="S2 (ABU DHABI)">S2 (ABU DHABI)</option>
+            <option value="C2 (ABU DHABI)">C2 (ABU DHABI)</option>
+            <option value="S4 (SUZUKA)">S4 (SUZUKA)</option>
+            <option value="C3 (SUZUKA)">C3 (SUZUKA)</option>
+            <option value="S3 (MONACO)">S4 (MONACO)</option>
+            <option value="C4 (MONACO)">C3 (MONACO)</option>
+            <option value="PH-Studio">PH Studio</option>
+            <option value="Plinko">Plinko</option>
+            <option value="MINI-PITX-TRACK">MINI-PITX-TRACK</option>
+            <option value="Admin">Admin</option>
+            <option value="Storage">Storage</option>
+            <option value="3D-Artist-Dept">3D-Artist-Dept</option>
+            <option value="Commentator-Pantry">Commentator-Pantry</option>
+            <option value="Hallway">Hallway</option>
+
+            <!-- Add more rooms as needed -->
+        </select>
+
+        <!-- Filter by Status -->
+        <select id="filterStatus" class="form-select form-select-sm" style="width: 180px;">
+            <option value="">All Status</option>
+            <option value="In Use">In Use</option>
+            <option value="Ready for Deployment">Ready for Deployment</option>
+            <option value="Backup">Backup</option>
+            <option value="Broken">Broken</option>
+        </select>
+    </div>
+
+    <div>
+        <input id="searchLabel" type="text" class="form-control form-control-sm" placeholder="Search label...">
+    </div>
+
+
+                            <tr class="table-primary">
+                                <th scope="col" class="text-center">#</th>
+                                <th class="text-center">Added By</th>
+                                <th class="text-center">Label</th>
+                                <th class="text-center">Room</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Actions</th>
+                                <th class="text-center">Serial NO:</th>
+                                <th class="text-center">Model</th>
+                                <th class="text-center">Details</th>
+                                <th class="text-center">Date Received</th>
+                                <th class="text-center">Date Modified</th>
+                                <th class="text-center">Last Modified By </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for specific_item in specific_items %}
+                            <tr>
+                                <td class="text-center">{{ forloop.counter }}</td>
+                                <td class="text-center text-danger">{{ specific_item.added_by.username | upper }}</td>
+                                <td class="text-center text-primary fw-bold">{{ specific_item.label | upper }}</td>
+                                <td class="text-center"><span class="badge" style="background-color: {{ specific_item.room.color }};">{{ specific_item.room.name }}</span></td>
+                                <td class="text-center"><span class="badge" style="background-color: {{ specific_item.get_status_color }};">{{ specific_item.get_status_display | upper }}</span></td>
+                                <td class="d-flex justify-content-center gap-2">
+                                    <a href="{% url 'edit-specific-item-status' pk=specific_item.id %}" class="btn btn-outline-danger btn-sm">Edit Status</a>
+                                    {% if user.is_superuser %}
+                                    <!-- Delete Button triggers modal -->
+                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ specific_item.pk }}">
+                                        Delete
+                                    </button>
+
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" id="deleteModal{{ specific_item.pk }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete <strong>{{ specific_item.label }}</strong>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form action="{% url 'delete-specific-item' pk=specific_item.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger"> Yes, Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-left">{{ specific_item.serial | upper }}</td>
+                                <td class="text-left">{{ specific_item.model }}</td>
+                                <td class="text-left">{{ specific_item.details }}</td>
+                                <td class="text-left text-success">{{ specific_item.date_added | date:"Y-m-d H:i" }}</td>
+                                <td class="text-left text-info">{{ specific_item.date_modified | date:"Y-m-d H:i" }}</td>
+<td class="text-left text-info">
+    {% if specific_item.last_modified_by %}
+        {{ specific_item.last_modified_by.get_full_name|default:specific_item.last_modified_by.username }}
+    {% else %}
+        <span>No changes yet</span>
+    {% endif %}
+</td>
+
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="11" class="text-center text-danger">NO POSTED ITEMS.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs nav-pills" id="itemTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active " id="tab1" data-bs-toggle="tab" href="#firstTab" role="tab" aria-controls="firstTab" aria-selected="true"><strong>ITEM STATUS</strong></a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="tab2" data-bs-toggle="tab" href="#secondTab" role="tab" aria-controls="secondTab" aria-selected="false"><strong>ITEM DISTRIBUTION CHART</strong></a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="tab4" data-bs-toggle="tab" href="#fourthTab" role="tab" aria-controls="fourthTab" aria-selected="false"><strong>ITEM MODEL LIST</strong></a>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="itemTabsContent">
+            <!-- First Tab - Item Details -->
+            <div class="tab-pane fade show active" id="firstTab" role="tabpanel" aria-labelledby="tab1">
+                <div class="container mt-4">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h4>Item Deployment and Requirements</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'item-detail' item.pk %}">
+                                {% csrf_token %}
+                                <table class="table table-hover table-striped table-bordered">
+                                    <thead class="bg-primary text-primary">
+                                        <tr>
+                                            <th scope="col" class="text-center">Location</th>
+                                            <th scope="col" class="text-center">Requirement</th>
+                                            <th scope="col" class="text-center">Current Use</th>
+                                            <th scope="col" class="text-center">Propose Spare</th>
+                                            <th scope="col" class="text-center">Current Spare/Stock</th>
+                                            <th scope="col" class="text-center">Quantity Needed</th>
+                                            <th scope="col" class="text-center">Broken</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- LAS VEGAS -->
+                                        <tr class="clickable-row ">
+                                            <th scope="row" class="text-primary" >S1 LAS VEGAS </th>
+                                            <td class="text-center">{{ item.requirement_las_vegas }}</td>
+                                            <td class="text-center">{{ las_vegas_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_las_vegas }}</td>
+                                            <td class="text-center">{{ las_vegas_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ las_vegas_total }}</td>
+                                            <td class="text-center text-danger">{{ las_vegas_broken }}</td>
+                                        </tr>
+                                        {% for item in model_counts %}
+                                        <tr  class="hidden-row table-dark" style="display: none;">
+                                            <th scope="row" class="text-light" ><strong>null</strong></th>
+                                            <td class="text-center"><strong>null</strong></td>
+                                            <td class="text-center"><strong>null</strong></td>
+                                            <td class="text-center"><strong>null</strong></td>
+                                            <td class="text-center"><strong>null</strong></td>
+                                            <td class="text-center"><strong>null</strong></td>
+                                            <td class="text-center table-danger"><strong>null</strong></td>
+                                        </tr>
+                                        {% endfor %}
+                                        <!-- ABU DHABI -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">S4 ABU DHABI</th>
+                                            <td class="text-center">{{ item.requirement_abu_dhabi }}</td>
+                                            <td class="text-center">{{ abu_dhabi_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_abu_dhabi }}</td>
+                                            <td class="text-center">{{ abu_dhabi_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ abu_dhabi_total }}</td>
+                                            <td class="text-center text-danger">{{ abu_dhabi_broken }}</td>
+                                        </tr>
+                                        <!-- MONACO -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">S3 MONACO</th>
+                                            <td class="text-center">{{ item.requirement_monaco }}</td>
+                                            <td class="text-center">{{ monaco_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_monaco }}</td>
+                                            <td class="text-center">{{ monaco_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ monaco_total }}</td>
+                                            <td class="text-center text-danger">{{ monaco_broken }}</td>
+                                        </tr>
+                                        <!-- SUZUKA -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">S2 SUZUKA</th>
+                                            <td class="text-center">{{ item.requirement_suzuka }}</td>
+                                            <td class="text-center">{{ suzuka_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_suzuka }}</td>
+                                            <td class="text-center">{{ suzuka_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ suzuka_total }}</td>
+                                            <td class="text-center text-danger">{{ suzuka_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">C1 LAS VEGAS</th>
+                                            <td class="text-center">{{ item.c1_requirement_las_vegas }}</td>
+                                            <td class="text-center">{{ c1_las_vegas_count }}</td>
+                                            <td class="text-center">{{ item.c1_propose_spare_las_vegas }}</td>
+                                            <td class="text-center">{{ c1_las_vegas_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ c1_las_vegas_total }}</td>
+                                            <td class="text-center text-danger">{{ c1_las_vegas_broken }}</td>
+                                        </tr>
+                                        <!-- C2 ABU DHABI -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">C2 ABU DHABI</th>
+                                            <td class="text-center">{{ item.c2_requirement_abu_dhabi }}</td>
+                                            <td class="text-center">{{ c2_abu_dhabi_count }}</td>
+                                            <td class="text-center">{{ item.c2_propose_spare_abu_dhabi }}</td>
+                                            <td class="text-center">{{ c2_abu_dhabi_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ c2_abu_dhabi_total }}</td>
+                                            <td class="text-center text-danger">{{ c2_abu_dhabi_broken }}</td>
+                                        </tr>
+                                        <!-- C3 SUZUKA -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">C3 SUZUKA</th>
+                                            <td class="text-center">{{ item.c3_requirement_suzuka }}</td>
+                                            <td class="text-center">{{ c3_suzuka_count }}</td>
+                                            <td class="text-center">{{ item.c3_propose_spare_suzuka }}</td>
+                                            <td class="text-center">{{ c3_suzuka_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ c3_suzuka_total }}</td>
+                                            <td class="text-center text-danger">{{ c3_suzuka_broken }}</td>
+                                        </tr>
+                                        <!-- C4 MONACO -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">C4 MONACO</th>
+                                            <td class="text-center">{{ item.c4_requirement_monaco }}</td>
+                                            <td class="text-center">{{ c4_monaco_count }}</td>
+                                            <td class="text-center">{{ item.c4_propose_spare_monaco }}</td>
+                                            <td class="text-center">{{ c4_monaco_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ c4_monaco_total }}</td>
+                                            <td class="text-center text-danger">{{ c4_monaco_broken }}</td>
+                                        </tr>
+                                        <!-- Additional Locations -->
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">IT ROOM</th>
+                                            <td class="text-center">{{ item.it_room_requirements }}</td>
+                                            <td class="text-center">{{ it_room_count }}</td>
+                                            <td class="text-center">{{ item.it_room_propose_spare }}</td>
+                                            <td class="text-center">{{ it_room_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ it_room_total }}</td>
+                                            <td class="text-center text-danger">{{ it_room_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">IT Room-Stockroom</th>
+                                            <td class="text-center">{{ item.it_room_storage_requirements }}</td>
+                                            <td class="text-center">{{ it_room_storage_count }}</td>
+                                            <td class="text-center">{{ item.it_room_storage_propose_spare }}</td>
+                                            <td class="text-center">{{ it_room_storage_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ it_room_storage_total }}</td>
+                                            <td class="text-center text-danger">{{ it_room_storage_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">STORAGE </th>
+                                            <td class="text-center">{{ item.storage_1_requirement }}</td>
+                                            <td class="text-center">{{ storage_1_count }}</td>
+                                            <td class="text-center">{{ item.storage_1_propose_spare }}</td>
+                                            <td class="text-center">{{ storage_1_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ storage_1_total }}</td>
+                                            <td class="text-center text-danger">{{ storage_1_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">ADMIN/HR</th>
+                                            <td class="text-center">{{ item.admin_hr_requirement }}</td>
+                                            <td class="text-center">{{ admin_hr_count }}</td>
+                                            <td class="text-center">{{ item.admin_hr_propose_spare }}</td>
+                                            <td class="text-center">{{ admin_hr_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ admin_hr_total }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">HALLWAY</th>
+                                            <td class="text-center">{{ item.hallway_requirement }}</td>
+                                            <td class="text-center">{{ hallway_count }}</td>
+                                            <td class="text-center">{{ item.hallway_propose_spare }}</td>
+                                            <td class="text-center">{{ hallway_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ hallway_total }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">Commentator/Pantry</th>
+                                            <td class="text-center">{{ item.commentator_pantry_requirement }}</td>
+                                            <td class="text-center">{{ commentator_pantry_count }}</td>
+                                            <td class="text-center">{{ item.commentator_pantry_propose_spare }}</td>
+                                            <td class="text-center">{{ commentator_pantry_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ commentator_pantry_total }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">PH STUDIO</th>
+                                            <td class="text-center">{{ item.requirement_ph_studio }}</td>
+                                            <td class="text-center">{{ph_studio_count}}</td>
+                                            <td class="text-center">{{ item.propose_spare_ph_studio }}</td>
+                                            <td class="text-center">{{ ph_studio_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ ph_studio_total }}</td>
+                                            <td class="text-center text-danger">{{ storage_2_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">3D Artist Dept</th>
+                                            <td class="text-center">{{ item.requirement_3d_dept }}</td>
+                                            <td class="text-center">{{ artist_dept_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_3d_dept }}</td>
+                                            <td class="text-center">{{ artist_dept_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ artist_dept_total }}</td>
+                                            <td class="text-center text-danger">{{ storage_2_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">Plinko</th>
+                                            <td class="text-center">{{ item.requirement_plinko}}</td>
+                                            <td class="text-center">{{ plinko_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_plinko }}</td>
+                                            <td class="text-center">{{ plinko_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ plinko_total }}</td>
+                                            <td class="text-center text-danger">{{ storage_2_broken }}</td>
+                                        </tr>
+                                        <tr class="clickable-row">
+                                            <th scope="row" class="text-primary">MINI-PITX-TRACK</th>
+                                            <td class="text-center">{{ item.requirement_mini_pitx }}</td>
+                                            <td class="text-center">{{ mini_pitx_count }}</td>
+                                            <td class="text-center">{{ item.propose_spare_mini_pitx }}</td>
+                                            <td class="text-center">{{ mini_pitx_ready_backup }}</td>
+                                            <td class="text-center text-success">{{ mini_pitx_total }}</td>
+                                            <td class="text-center text-danger">{{ storage_2_broken }}</td>
+                                        </tr>
+                                        <!-- TOTAL NEEDED -->
+                                        <tr class=" clickable-row bg-light">
+                                            <th scope="row" class="text-primary">TOTAL</th>
+                                            <td class="text-center"><strong>{{ total_requirement }}</strong></td>
+                                            <td class="text-center text-default " style="background-color: #03fc2c;"><strong>{{ total_in_use }}</strong></td>
+                                            <td class="text-center"><strong>{{ total_propose_spare }}</strong></td>
+                                            <td class="text-center"><strong>{{ total_items }}</strong></td>
+                                            <td class="text-center text-success"><strong>{{ quantity_needed }}</strong></td>
+                                            <td class="text-center text-danger"><strong>{{ total_broken }}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mt-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h5>Inventory Summary</h5>
+                    </div>
+                    <div class="card-body card shadow-lg p-4 ">
+                        <table class="table table-hover table-striped table-bordered text-center">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-uppercase">Metric</th>
+                                    <th class="text-uppercase">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="table-primary text-default font-weight-bold">Total Needed</td>
+                                    <td class="table-light text-success ">{{ total_needed }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="table-primary text-default font-weight-bold">Total Current Used</td>
+                                    <td class="table-light"><strong>{{ total_in_use }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="table-primary text-default font-weight-bold">Total Current Spare</td>
+                                    <td class="table-light"><strong>{{ total_ready }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="table-primary text-default font-weight-bold">Total Current Stock</td>
+                                    <td class="table-light"><strong>{{ total_backup }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="table-primary text-default font-weight-bold">Total Quantity Needed to Buy</td>
+                                    <td class="table-light text-danger">{{ result }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="table-danger text-default font-weight-bold">Total Broken</td>
+                                    <td class="table-light text-danger">{{ total_broken}}</td>
+                                </tr>
+                                                            <tr>
+                                    <td class="table-success text-default font-weight-bold">Total Items</td>
+                                    <td class="table-light text-danger">{{ total_quantity}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% load custom_filters %}
+        <div class="tab-pane fade card shadow-lg p-4 " id="fourthTab" role="tabpanel" aria-labelledby="tab4">
+            <h3 class="text-center text-primary">ITEM MODEL LIST</h3>
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Model</th>
+                            {% for key, label in STATUS_CHOICES %}
+                            <th>{{ label }}</th>
+                            {% endfor %}
+                            <th class="bg-success text-white">Total</th>  <!-- Total column -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for model, statuses in model_data.items %}
+                        <tr>
+                            <td class="text-center text-primary"><strong>{{ model }}</strong></td>
+                            {% for key, label in STATUS_CHOICES %}
+                            <td>
+                                {% with statuses|get_item:label as count %}
+                                {% if count %}
+                                <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                                {% else %}
+                                <span class="text-muted">0</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            {% endfor %}
+                            <td class="bg-light fw-bold">{{ total_model_counts|get_item:model }}</td> <!-- Total column -->
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ STATUS_CHOICES|length|add:2 }}" class="text-muted">No models found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-pane fade card shadow-lg p-4 " id="secondTab" role="tabpanel" aria-labelledby="tab2">
+            <h3 class="text-center text-primary">ITEM DISTRIBUTION CHART</h3>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <h1 class=" text-center text-primary fs-10 fw-bold"><span style="color: lightcoral; font-weight: bold;"> {{ item.name }}</span></h1>
+            <div>
+                <canvas id="inventoryChart" width="300" height="150"></canvas>
+            </div>
+
+
+            <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.getElementById("deployedTable");
+
+  // ✅ Excel Export
+  document.getElementById("exportExcel").addEventListener("click", function () {
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Deployed Items" });
+    XLSX.writeFile(wb, "deployed_items.xlsx");
+  });
+
+  // ✅ PDF Export
+  document.getElementById("exportPDF").addEventListener("click", function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("l", "mm", "a4"); // Landscape for wide tables
+    doc.text("Deployed Items Report", 14, 10);
+    doc.autoTable({
+      html: "#deployedTable",
+      startY: 20,
+      theme: "grid",
+      styles: {
+        fontSize: 7,
+        cellPadding: 1.5,
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      bodyStyles: {
+        textColor: [0, 0, 0],
+      },
+      didDrawPage: function (data) {
+        doc.text("Generated on: " + new Date().toLocaleString(), 14, 200);
+      },
+    });
+    doc.save("deployed_items.pdf");
+  });
+
+  const searchLabel = document.getElementById("searchLabel");
+  const filterRoom = document.getElementById("filterRoom");
+  const filterStatus = document.getElementById("filterStatus");
+  const tableRows = table.querySelectorAll("tbody tr");
+
+  function applyFilters() {
+    const labelValue = searchLabel.value.toLowerCase();
+    const roomValue = filterRoom.value.toLowerCase();
+    const statusValue = filterStatus.value.toLowerCase();
+
+    tableRows.forEach((row) => {
+      const label = row.querySelector("td:nth-child(3)")?.textContent.toLowerCase() || "";
+      const room = row.querySelector("td:nth-child(4)")?.textContent.toLowerCase() || "";
+      const status = row.querySelector("td:nth-child(5)")?.textContent.toLowerCase() || "";
+
+      const matchesLabel = label.includes(labelValue);
+      const matchesRoom = roomValue === "" || room.includes(roomValue);
+      const matchesStatus = statusValue === "" || status.includes(statusValue);
+
+      row.style.display = matchesLabel && matchesRoom && matchesStatus ? "" : "none";
+    });
+  }
+
+  searchLabel.addEventListener("input", applyFilters);
+  filterRoom.addEventListener("change", applyFilters);
+  filterStatus.addEventListener("change", applyFilters);
+});
+document.addEventListener("DOMContentLoaded", function () {
+  const table = document.getElementById("deployedTable");
+  const sortButton = document.getElementById("sortLabel");
+  const tbody = table.querySelector("tbody");
+
+  let ascending = true; // Track current sort direction
+
+  sortButton.addEventListener("click", function () {
+    const rows = Array.from(tbody.querySelectorAll("tr")).filter(row => row.querySelector("td"));
+
+    rows.sort((a, b) => {
+      const labelA = a.querySelector("td:nth-child(3)")?.textContent.trim().toLowerCase() || "";
+      const labelB = b.querySelector("td:nth-child(3)")?.textContent.trim().toLowerCase() || "";
+      return ascending ? labelA.localeCompare(labelB) : labelB.localeCompare(labelA);
+    });
+
+    // Re-append sorted rows to tbody
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Toggle sorting direction
+    ascending = !ascending;
+    sortButton.textContent = ascending ? "Sort A → Z" : "Sort Z → A";
+  });
+});
+
+            // Data passed from Django context
+            const labels = ["Las Vegas", "Abu Dhabi", "Monaco", "Suzuka", "C1 (Las Vegas)", "C2 (Abu Dhabi)", "C3 (Suzuka)", "C4 (Monaco)","IT-Office" ,"Storage","Admin/Hr","Hallway","PH-STUDIO","3D-Artist-Dept","MINI-PITX-TRACK","Plinko","Broken","Backup/Stock","Quantity",];
+
+            const inUseData = [
+                {{ las_vegas_count }},
+                {{ abu_dhabi_count }},
+                {{ monaco_count }},
+                {{ suzuka_count }},
+                {{ c1_las_vegas_count }},
+                {{ c2_abu_dhabi_count }},
+                {{ c3_suzuka_count }},
+                {{ c4_monaco_count }},
+                {{ it_room_count }},
+                {{storage_1_count}},
+                {{admin_hr_count}},
+                {{hallway_count}},
+                {{ph_studio_count}},
+                {{artist_dept_count}},
+                {{plinko_count}},
+                {{mini_pitx_count}},
+
+                null, // Padding for Broken
+                null  // Padding for Backup
+            ];
+
+            const readyForDeploymentData = [
+                {{ las_vegas_count_deployment }},
+                {{ abu_dhabi_count_deployment }},
+                {{ monaco_count_deployment }},
+                {{ suzuka_count_deployment }},
+                {{ c1_las_vegas_count_deployment }},
+                {{ c2_abu_dhabi_count_deployment }},
+                {{ c3_suzuka_count_deployment }},
+                {{ c4_monaco_count_deployment }},
+                {{ it_room_count_deployment }},
+                {{it_room_storage_count_deployment}},
+                {{storage_1_count_deployment}},
+                {{admin_hr_count_deployment}},
+                {{hallway_count_deployment}},
+                {{ph_studio_count_deployment}},
+                {{artist_dept_count_deployment}},
+                {{plinko_count_deployment}},
+                {{mini_pitx_count_deployment}},
+                null, // Padding for Broken
+                null  // Padding for Backup
+            ];
+
+
+            const brokenData = [
+                null, null, null, null, // Padding for location labels
+                null, null, null, null, // Padding for C1-C4
+                null, // Padding for IT-Office
+                null, null, null,null,null,null,null,
+                {{ total_broken }}, // Value for Broken
+                null //
+
+            ];
+
+            const backupData = [
+
+                null, null, null, null, // Padding for location labels
+                null, null, null, null, // Padding for C1-C4
+                null,
+                null, null, null,
+                null,null,null,null, // Padding for Broken
+                {{ total_backup }} // Value for Backup
+            ];
+
+            // Chart configuration
+            const ctx = document.getElementById('inventoryChart').getContext('2d');
+            const inventoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels, // All labels including Broken and Backup
+                    datasets: [
+                        {
+                            label: 'In Use',
+                            data: inUseData,
+                            backgroundColor: 'rgba(3,252,44, 0.7)',
+                            borderColor: 'rgba(3,252,44)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Ready for Deployment',
+                            data: readyForDeploymentData,
+                            backgroundColor: 'rgba(71,171,214, 0.7)',
+                            borderColor: 'rgba(71,171,214)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Broken',
+                            data: brokenData,
+                            backgroundColor: 'rgba(117, 124, 128, 0.7)',
+                            borderColor: 'rgba(117, 124, 128)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Backup/Stock',
+                            data: backupData,
+                            backgroundColor: 'rgba(209, 188, 52, 0.7)',
+                            borderColor: 'rgba(209, 188, 52)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top', // Adjust legend position
+                        },
+                        tooltip: {
+                            enabled: true,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true // Ensure the y-axis starts at zero
+                        }
+                    }
+                }
+            });
+            document.querySelectorAll(".clickable-row").forEach(row => {
+                row.addEventListener("click", function() {
+                    let nextRow = this.nextElementSibling;
+                    if (nextRow && nextRow.classList.contains("hidden-row")) {
+                        nextRow.style.display = nextRow.style.display === "none" ? "table-row" : "none";
+                    }
+                });
+            });
+
+
+
+            </script>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn {
+        font-size: 1rem;
+        padding: 5px 10px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+    .logo-hover {
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .logo-hover:hover {
+        transform: scale(3.0); /* Slightly increases size */
+        filter: brightness(1.2); /* Increases brightness on hover */
+    }
+    .table th,
+    .table td {
+        padding: 0.5px 1px;
+        vertical-align: center;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f1f1f1;
+        cursor: pointer;
+    }
+
+    .item-details-card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for left card */
+    }
+
+    .card.shadow-lg {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Larger shadow for the right section */
+    }
+</style>
+{% endblock %}
+

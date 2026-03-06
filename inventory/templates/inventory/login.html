@@ -1,0 +1,51 @@
+{% extends 'inventory/base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center vh-100">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card shadow-lg p-4">
+            <div class="card-body text-center">
+                <!-- Company Logo (ensure the path is correct) -->
+                <img src="{% static 'images/GEMINI.png' %}" alt="Company Logo" class="mb-4 logo-hover" style="max-width: 180px;">
+
+                <h3 class="text-primary mb-4">Log In</h3>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Display the form fields with crispy_forms -->
+                    <div class="mb-3">
+                        {{ form|crispy }}
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-3">Sign In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .logo-hover {
+        transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .logo-hover:hover {
+        transform: scale(1.1); /* Slightly increases size */
+        filter: brightness(1.2); /* Increases brightness on hover */
+    }
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+</style>
+{% endblock content %}
+{% block extra_styles %}
+
+{% endblock %}

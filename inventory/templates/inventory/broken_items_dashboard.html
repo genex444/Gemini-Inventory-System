@@ -1,0 +1,90 @@
+{% extends 'inventory/base.html' %}
+
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Broken Inventory Items</h2>
+
+    <table class="table table-hover align-middle shadow-sm">
+        <thead class="table-primary text-center">
+            <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Inventory Item</th>
+                <th>Label</th>
+                <th>Status</th>
+                <th>Model</th>
+                <th>User</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if broken_items %}
+                {% for specific in broken_items %}
+                <tr class="align-middle">
+                    <td class="text-center">{{ specific.id }}</td>
+
+                    <!-- Image column -->
+                    <td class="text-center">
+                        {% if specific.inventory_item.image %}
+                            <img src="{{ specific.inventory_item.image.url }}"
+                                 alt="{{ specific.inventory_item.name }}"
+                                 class="img-thumbnail"
+                                 style="width: 60px; height: 60px; object-fit: cover;">
+                        {% else %}
+                            <i class="fa fa-image text-muted"></i>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-center fw-bold">{{ specific.inventory_item.name | upper  }}</td>
+
+                    <td class="text-center">
+                        {{ specific.label | upper  }}
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge bg-secondary">{{ specific.status }}</span>
+                    </td>
+                    <td class="text-center">
+                        {{ specific.model }}
+                    </td>
+                    <td class="text-center">{{ specific.inventory_item.user.username  | upper }}</td>
+
+                    <td class="text-center text-info">{{ specific.date_added | date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">No broken items found.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+    }
+
+    .img-thumbnail {
+        border-radius: 0.5rem;
+        border: 1px solid #dee2e6;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .img-thumbnail:hover {
+        transform: scale(1.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock content %}

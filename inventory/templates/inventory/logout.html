@@ -1,0 +1,55 @@
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+    
+    
+    <script>
+    let idleTime = 0;
+
+    // Increment idle time every minute
+    setInterval(function () {
+        idleTime++;
+        if (idleTime > 1) {  // 10 minutes of inactivity
+            window.location.href = '/login/';  // Redirect to logout URL after 10 minutes of inactivity
+        }
+    }, 60000);  // Increment every minute
+
+    // Reset idle time on any user interaction
+    document.onmousemove = resetIdleTime;
+    document.onkeypress = resetIdleTime;
+    document.onclick = resetIdleTime;
+    document.onscroll = resetIdleTime;
+
+    function resetIdleTime() {
+        idleTime = 0;
+    }
+</script>
+
+	<div class=" row  ">
+		<div class="col-11 col-md-4 mx-auto mt-5 ">
+			<h2>Logged Out</h2>
+			<div class="border-top pt-3">
+				<small class="text-muted">
+					<a href="{% url 'login' %}" class="btn btn-primary">Log In Again</a>
+				</small>
+			</div>
+		</div>
+	</div>
+
+<style>
+
+
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+
+</style>
+{% endblock content %}
+
+

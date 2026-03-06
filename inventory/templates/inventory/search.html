@@ -1,0 +1,213 @@
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+<div class="container my-4 card shadow-lg p-4 ">
+
+    <h2 class="text-center text-primary">SEARCH ITEMS BY ROOMS</h2>
+
+    <form method="get" class="row g-3">
+        <!-- Room Input -->
+<div class="col-md-3">
+    <label for="room" class="form-label">Room</label>
+    <select id="room" name="room" class="form-select">
+        <option value="">All Rooms</option>
+        {% for room in rooms %}
+            <option value="{{ room.name }}" {% if selected_room == room.name %}selected{% endif %}>
+                {{ room.name }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+
+        <!-- Search Input -->
+        <div class="col-md-3">
+            <label for="search" class="form-label">Search</label>
+            <input
+                type="text"
+                id="search"
+                name="search"
+                class="form-control"
+                value="{{ search_query }}"
+                placeholder="Search for items">
+        </div>
+
+        <!-- Sort By Dropdown -->
+        <div class="col-md-2">
+            <label for="sort_by" class="form-label">Sort By</label>
+            <select id="sort_by" name="sort_by" class="form-select">
+                <option value="label" {% if current_sort == 'label' %}selected{% endif %}>Label</option>
+                <option value="status" {% if current_sort == 'status' %}selected{% endif %}>Status</option>
+                <option value="date_added" {% if current_sort == 'date_added' %}selected{% endif %}>Date Added</option>
+            </select>
+        </div>
+
+        <!-- Order Dropdown -->
+        <div class="col-md-2">
+            <label for="order" class="form-label">Order</label>
+            <select id="order" name="order" class="form-select">
+                <option value="asc" {% if current_order == 'asc' %}selected{% endif %}>Ascending</option>
+                <option value="desc" {% if current_order == 'desc' %}selected{% endif %}>Descending</option>
+            </select>
+        </div>
+
+        <!-- Search Button -->
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+        <div>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary my-3">🢀 Go Back</a>
+        </div>
+        <!-- Export Buttons -->
+        <div class="col-12 mt-3 d-flex justify-content-between">
+            <button type="submit" name="format" value="excel" class="btn btn-success">
+                Export to Excel
+            </button>
+
+            <button type="submit" name="format" value="pdf" class="btn btn-danger">
+                Export to PDF
+            </button>
+        </div>
+    </form>
+
+    <br>
+<div class="d-flex shadow">
+    <!-- Results Section (70% width) -->
+    <div class="me-3" style="width: 70%;">
+        <table class="table table-bordered table-hover">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Image</th>
+                    <th>Item</th>
+                    <th>Label</th>
+                    <th>Status</th>
+                    <th>Room</th>
+                    <th>Date Added</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for specific_item in specific_items %}
+                    <tr>
+                        <td>
+                            {% if specific_item.inventory_item.image %}
+                                <img src="{{ specific_item.inventory_item.image.url }}" alt="{{ specific_item.inventory_item.name }}" style="max-width: 50px; height: auto;">
+                            {% else %}
+                                <span>No image</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-danger fw-bold">{{ specific_item.inventory_item }}</td>
+                        <td class="text-primary">{{ specific_item.label }}</td>
+                        <td>
+                            <span class="badge text-white" style="background-color: {{ specific_item.get_status_color }};">
+                                {{ specific_item.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge text-white" style="background-color: {{ specific_item.room.color }}; border-radius: 30px;">
+                                {{ specific_item.room.name }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary">
+                                {{ specific_item.date_added|date:"M d, Y" }}
+                            </span>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">No results found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sidebar (30% width) -->
+<div class="card shadow-lg p-3" style="width: 30%; min-height: 200px;">
+    <h5 class="text-center text-primary fw-bold">DEPLOYED ITEMS</h5>
+    <hr>
+
+    <!-- Scrollable container -->
+    <div style="max-height: 600px; overflow-y: auto;">
+        <ul class="list-group">
+            {% for item in room_item_counts %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ item.inventory_item__name }}</span>
+                    <strong class="text-center text-primary">{{ item.total }}</strong> <!-- Shows total count per item -->
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted text-center">No items deployed.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+</div>
+
+
+
+    <!-- Pagination -->
+{% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Page Link -->
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}"
+                        aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                </li>
+            {% endif %}
+
+            <!-- Page Numbers -->
+            {% for num in page_obj.paginator.page_range %}
+                {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+                    <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Next Page Link -->
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a
+                        class="page-link"
+                        href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}"
+                        aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+</div>
+
+
+<style>
+        .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+
+</style>
+{% endblock %}

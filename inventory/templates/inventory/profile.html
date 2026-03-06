@@ -1,0 +1,33 @@
+<!-- profile.html -->
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h2>{{ user.username }}'s Profile</h2>
+    <p>Email: {{ user.email }}</p>
+    <p>Joined on: {{ user.date_joined }}</p>
+
+    <h3>Action History</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Item</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for history in user_history %}
+                <tr>
+                    <td>{{ history.action }}</td>
+                    <td>{{ history.item.name if history.item else 'N/A' }}</td>
+                    <td>{{ history.timestamp }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No history found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

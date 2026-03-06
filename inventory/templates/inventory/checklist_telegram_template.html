@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Checklist — {{ details.studio }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        h2 {
+            text-align: center;
+            background: #2f5496;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        p {
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #ddebf7;
+        }
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Daily Checklist — {{ details.studio }}</h2>
+
+    <p>
+        <strong>Date:</strong> {{ details.date }}<br>
+        <strong>Time:</strong> {{ details.time|default:"—" }}<br>
+        <strong>Submitted by:</strong> {{ details.user }}
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Equipment</th>
+                <th>Time</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Remarks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in checklist_items %}
+            <tr>
+                <td>{{ item.equipment_name }}</td>
+                <td>{{item.time}}</td>
+                <td>{{ details.user }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ details.date }}</td>
+                <td>{{ item.remarks|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

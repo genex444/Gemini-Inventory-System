@@ -1,0 +1,130 @@
+{% extends 'inventory/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary my-3 mx-4">🢀 Go Back</a>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12 col-md-8 mx-auto">
+                <h1 class="mb-4 text-center text-primary fs-4 fw-bold">Create Inventory Item</h1>
+
+                <!-- Form -->
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="card shadow-lg p-4">
+                        <div class="card-body">
+                            <!-- General Information -->
+                            <h3>ITEM Details </h3>
+                            {{ form.name|as_crispy_field }}
+                            {{ form.quantity|as_crispy_field }}
+                            {{ form.category|as_crispy_field }}
+                            {{ form.supplier|as_crispy_field }}
+                            {{ form.local|as_crispy_field }}
+                            {{ form.image|as_crispy_field }}
+                            {{ form.groups|as_crispy_field }}
+
+                            <!-- Collapsible Requirements -->
+                            <div class="accordion mt-4" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingRequirements">
+                                        <button class="accordion-button collapsed mb-4 text-center text-light fs-5 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRequirements" aria-expanded="false" aria-controls="collapseRequirements">
+                                            Requirements
+                                        </button>
+                                    </h2>
+                                    <div id="collapseRequirements" class="accordion-collapse collapse" aria-labelledby="headingRequirements" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            {{ form.requirement_las_vegas|as_crispy_field }}
+                                            {{ form.requirement_abu_dhabi|as_crispy_field }}
+                                            {{ form.requirement_monaco|as_crispy_field }}
+                                            {{ form.requirement_suzuka|as_crispy_field }}
+                                            {{ form.c1_requirement_las_vegas|as_crispy_field }}
+                                            {{ form.c2_requirement_abu_dhabi|as_crispy_field }}
+                                            {{ form.c4_requirement_monaco|as_crispy_field }}
+                                            {{ form.c3_requirement_suzuka|as_crispy_field }}
+                                            {{ form.it_room_requirements|as_crispy_field }}
+                                            {{ form.storage_1_requirement|as_crispy_field }}
+                                            {{form.admin_hr_requirement|as_crispy_field}}
+                                            {{form.hallway_requirement|as_crispy_field}}
+                                            {{form.commentator_pantry_requirement|as_crispy_field}}
+                                            {{ form.requirement_ph_studio|as_crispy_field }}
+                                            {{ form.requirement_3d_dept|as_crispy_field }}
+                                            {{ form.requirement_seven_floor|as_crispy_field }}
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Collapsible Proposed Spares -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingProposedSpares">
+                                        <button class="accordion-button collapsed mb-4 text-center text-light fs-5 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProposedSpares" aria-expanded="false" aria-controls="collapseProposedSpares">
+                                            Proposed Spares
+                                        </button>
+                                    </h2>
+                                    <div id="collapseProposedSpares" class="accordion-collapse collapse" aria-labelledby="headingProposedSpares" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            {{ form.propose_spare_las_vegas|as_crispy_field }}
+                                            {{ form.propose_spare_abu_dhabi|as_crispy_field }}
+                                            {{ form.propose_spare_monaco|as_crispy_field }}
+                                            {{ form.propose_spare_suzuka|as_crispy_field }}
+                                            {{ form.c1_propose_spare_las_vegas|as_crispy_field }}
+                                            {{ form.c2_propose_spare_abu_dhabi|as_crispy_field }}
+                                            {{ form.c4_propose_spare_monaco|as_crispy_field }}
+                                            {{ form.c3_propose_spare_suzuka|as_crispy_field }}
+                                            {{ form.it_room_propose_spare|as_crispy_field }}
+                                            {{ form.storage_1_propose_spare|as_crispy_field }}
+                                            {{form.admin_hr_propose_spare|as_crispy_field}}
+                                            {{form.hallway_propose_spare|as_crispy_field}}
+                                            {{form.commentator_pantry_propose_spare|as_crispy_field}}
+                                            {{ form.propose_spare_ph_studio|as_crispy_field }}
+                                            {{ form.propose_spare_3d_dept|as_crispy_field }}
+                                            {{ form.propose_spare_seven_floor|as_crispy_field }}
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-4 fs-5">Saved💾</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .accordion-button {
+    font-weight: bold;
+    background-color: #303c54;
+}
+
+.accordion-button:not(.collapsed) {
+    color: #090909;
+    background-color: #7f828a;
+}
+
+.accordion-body {
+    background-color: #ffffff;
+    padding: 15px;
+    border: 2px solid #ffffff;
+}
+
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+
+</style>
+
+
+{% endblock content %}

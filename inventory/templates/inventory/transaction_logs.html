@@ -1,0 +1,84 @@
+{% extends 'inventory/base.html' %}
+
+{% block content %}
+<div class="container mt-5 card shadow-lg p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> 🢀 Go Back
+        </a>
+
+        <!-- Button to trigger modal -->
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="fa fa-trash-o"></i> Clear Logs
+        </button>
+    </div>
+
+    <h2 class="text-center text-primary fw-bold">Transaction Logs</h2>
+    <hr class="mb-4" />
+
+    {% if logs %}
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th style="font-size:1.1em"><strong>#</strong></th>
+                    <th style="font-size:1.1em"><strong>User</strong></th>
+                    <th style="font-size:1.1em"><strong>Action</strong></th>
+                    <th style="font-size:1.1em"><strong>Description</strong></th>
+                    <th style="font-size:1.1em"><strong>Timestamp</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="text-center">{{ forloop.counter }}</td>
+                    <td class="text-center text-danger">{{ log.user.username | upper }}</td>
+                    <td class="text-center text-primary">{{ log.get_action_display | upper }}</td>
+                    <td class="text-center">{{ log.description }}</td>
+                    <td class="text-center text-info">{{ log.timestamp | date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center" role="alert">
+        <i class="bi bi-exclamation-circle"></i> No transaction logs found.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Log Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete all transaction logs? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+    .btn:hover {
+        transform: scale(1.02);
+        background-color: #b0b8b5;
+    }
+</style>
+
+{% endblock %}

@@ -1,0 +1,510 @@
+{% extends 'inventory/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Custom styles for the location view page */
+    body {
+        background-color: #f8f9fa; /* A light, clean background */
+    }
+
+    .card-header h2 {
+        margin-bottom: 0;
+        font-size: 1.5rem;
+    }
+
+    .table th {
+        white-space: nowrap;
+    }
+
+    .status-dropdown {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.375rem 0.75rem;
+        font-weight: bold;
+        width: 100%;
+        min-width: 120px;
+    }
+
+    /* Color styles for dropdowns */
+    .status-good {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .status-not-good {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .status-broken {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    .status-maintenance {
+        background-color: #e2e3e5;
+        color: #41464b;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 mb-0">Studio Incident Overview</h1>
+        <a href="{% url 'location_data' %}" class="btn btn-outline-secondary">View Location Data Report</a>
+    </div>
+
+    <!-- Main Grid for Locations -->
+    <div class="row g-4">
+
+        <!-- Las Vegas Card -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h2>LAS VEGAS</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-lasvegas" class="table table-striped table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>USER</th>
+                                    <th>DATE</th>
+                                    <th>TOPVIEW</th>
+                                    <th>OBS</th>
+                                    <th>AUDIO</th>
+                                    <th>CAMERA</th>
+                                    <th>NETWORK</th>
+                                    <th>PRINTER</th>
+                                    <th>AI CAM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in lasvegas_data %}
+                                <tr>
+                                    <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                                    <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="button-group">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-lasvegas')">Add Row</button>
+                        <button class="btn btn-primary btn-sm" onclick="saveTableData('table-lasvegas', 'lasvegas')">Save Las Vegas Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monaco Card -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h2>MONACO</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-monaco" class="table table-striped table-hover table-sm">
+                             <thead class="table-light">
+                                <tr>
+                                    <th>USER</th>
+                                    <th>DATE</th>
+                                    <th>TOPVIEW</th>
+                                    <th>OBS</th>
+                                    <th>AUDIO</th>
+                                    <th>CAMERA</th>
+                                    <th>NETWORK</th>
+                                    <th>PRINTER</th>
+                                    <th>AI CAM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in monaco_data %}
+                                <tr>
+                                    <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                                    <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="button-group">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-monaco')">Add Row</button>
+                        <button class="btn btn-success btn-sm" onclick="saveTableData('table-monaco', 'monaco')">Save Monaco Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suzuka Card -->
+        <div class="col-xl-6">
+             <div class="card shadow-sm h-100">
+                <div class="card-header bg-danger text-white">
+                    <h2>SUZUKA</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-suzuka" class="table table-striped table-hover table-sm">
+                             <thead class="table-light">
+                                <tr>
+                                    <th>USER</th>
+                                    <th>DATE</th>
+                                    <th>TOPVIEW</th>
+                                    <th>OBS</th>
+                                    <th>AUDIO</th>
+                                    <th>CAMERA</th>
+                                    <th>NETWORK</th>
+                                    <th>PRINTER</th>
+                                    <th>AI CAM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in suzuka_data %}
+                                <tr>
+                                    <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                                    <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="button-group">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-suzuka')">Add Row</button>
+                        <button class="btn btn-danger btn-sm" onclick="saveTableData('table-suzuka', 'suzuka')">Save Suzuka Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abu Dhabi Card -->
+        <div class="col-xl-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h2>ABU DHABI</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="table-abudhabi" class="table table-striped table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>USER</th>
+                                    <th>DATE</th>
+                                    <th>TOPVIEW</th>
+                                    <th>OBS</th>
+                                    <th>AUDIO</th>
+                                    <th>CAMERA</th>
+                                    <th>NETWORK</th>
+                                    <th>PRINTER</th>
+                                    <th>AI CAM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in abudhabi_data %}
+                                <tr>
+                                    <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                                    <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+                                    <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                    <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}<option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>{% endfor %}</select></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="button-group">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-abudhabi')">Add Row</button>
+                        <button class="btn btn-warning btn-sm" onclick="saveTableData('table-abudhabi', 'abudhabi')">Save Abu Dhabi Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<!-- Philippines Card -->
+<div class="col-xl-6">
+    <div class="card shadow-sm h-100">
+        <div class="card-header bg-info text-white">
+            <h2>PHILIPPINES</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="table-philippines" class="table table-striped table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>USER</th>
+                            <th>DATE</th>
+                            <th>TOPVIEW</th>
+                            <th>OBS</th>
+                            <th>AUDIO</th>
+                            <th>CAMERA</th>
+                            <th>NETWORK</th>
+                            <th>PRINTER</th>
+                            <th>AI CAM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in philippines_data %}
+                        <tr>
+                            <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                            <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+
+                            <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="button-group">
+                <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-philippines')">Add Row</button>
+                <button class="btn btn-info btn-sm" onclick="saveTableData('table-philippines', 'philippines')">Save Philippines Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<!-- Plinko Card -->
+<div class="col-xl-6">
+    <div class="card shadow-sm h-100">
+        <div class="card-header" style="background-color: purple; color: white;">
+            <h2>PLINKO</h2>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="table-plinko" class="table table-striped table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>USER</th>
+                            <th>DATE</th>
+                            <th>TOPVIEW</th>
+                            <th>OBS</th>
+                            <th>AUDIO</th>
+                            <th>CAMERA</th>
+                            <th>NETWORK</th>
+                            <th>PRINTER</th>
+                            <th>AI CAM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in plinko_data %}
+                        <tr>
+                            <td class="text-danger fw-bold small">{{ entry.user.username }}</td>
+                            <td class="small">{{ entry.timestamp|date:"Y-m-d H:i" }}</td>
+
+                            <td><select name="topview" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.topview %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="obs" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.obs %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="audio" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.audio %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="camera" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.camera %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="network_status" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.network_status %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="printer_status" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.printer_status %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+
+                            <td><select name="AI_Cam" class="status-dropdown">{% for o in statusOptions %}
+                                <option value="{{ o }}" {% if o == entry.AI_Cam %}selected{% endif %}>{{ o }}</option>
+                            {% endfor %}</select></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-light">
+            <div class="button-group">
+                <button class="btn btn-outline-secondary btn-sm" onclick="addRow('table-plinko')">Add Row</button>
+                <button class="btn btn-dark btn-sm" onclick="saveTableData('table-plinko', 'plinko')">Save Plinko Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    {% if request.user.is_authenticated %}
+    const loggedInUser = "{{ request.user.username }}";
+    {% else %}
+    const loggedInUser = "Anonymous";
+    {% endif %}
+
+    const statusOptions = ['GOOD', 'NOT_GOOD', 'BROKEN','MAINTENANCE'];
+
+    function updateDropdownColor(select) {
+        select.className = 'status-dropdown'; // Reset classes
+        const value = select.value.toLowerCase().replace('_', '-');
+        select.classList.add(`status-${value}`);
+    }
+
+    function addRow(tableId) {
+        const table = document.getElementById(tableId).getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow(-1);
+
+        // User Cell
+        const userCell = newRow.insertCell(0);
+        userCell.innerText = loggedInUser;
+        userCell.className = 'text-danger fw-bold small';
+
+        // Date Cell
+        const now = new Date();
+        const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        const dateCell = newRow.insertCell(1);
+        dateCell.innerText = formattedDate;
+        dateCell.className = 'small';
+
+        // Dropdown Cells
+        ['topview', 'obs', 'audio', 'camera','network_status','printer_status','AI_Cam'].forEach(name => {
+            const cell = newRow.insertCell(-1);
+            const dropdown = document.createElement('select');
+            dropdown.name = name;
+            dropdown.className = 'status-dropdown';
+
+            statusOptions.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                dropdown.appendChild(opt);
+            });
+
+            dropdown.addEventListener('change', () => updateDropdownColor(dropdown));
+            updateDropdownColor(dropdown); // Set initial color
+            cell.appendChild(dropdown);
+        });
+    }
+
+    function getCSRFToken() {
+        // A more robust way to get the CSRF token from cookies
+        return document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+    }
+
+    function saveTableData(tableId, location) {
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll("tbody tr");
+        const data = [];
+
+        rows.forEach(row => {
+            const cells = row.cells;
+            if (cells.length < 9) return;
+
+            data.push({
+                topview: cells[2].querySelector('select')?.value,
+                obs: cells[3].querySelector('select')?.value,
+                audio: cells[4].querySelector('select')?.value,
+                camera: cells[5].querySelector('select')?.value,
+                network_status: cells[6].querySelector('select')?.value,
+                printer_status: cells[7].querySelector('select')?.value,
+                AI_Cam: cells[8].querySelector('select')?.value,
+            });
+        });
+
+        fetch('/incident_overview/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({ location: location, data: data })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            alert('Data saved successfully!');
+            console.log(result);
+            // Optionally, you can reload the page to show persisted data
+            // window.location.reload();
+        })
+        .catch(error => {
+            alert('Error saving data. See console for details.');
+            console.error('Save Error:', error);
+        });
+    }
+
+    // Apply initial colors to all dropdowns on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.status-dropdown').forEach(updateDropdownColor);
+    });
+
+</script>
+{% endblock content %}
